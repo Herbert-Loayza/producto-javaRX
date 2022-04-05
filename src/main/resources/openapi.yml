@@ -1,0 +1,431 @@
+openapi: 3.0.1
+info:
+  title: Products Management Management
+  description: Api de para registrar Productos Pasivos y Activos.
+  version: 1.0.0
+paths:
+  /add-product:
+    post:
+      tags:
+        - add products
+      summary: Agregar Productos
+      description: |
+        ## Acerca de la funcionalidad expuesta
+
+        Agrega productos de crédito y pasivos
+
+      operationId: addProducts
+      parameters:
+        # HEADERS
+        - $ref: "#/components/parameters/Authorization"
+        - $ref: "#/components/parameters/Request-ID"
+        - $ref: "#/components/parameters/app-code"
+        - $ref: "#/components/parameters/session-UID"
+      requestBody:
+        $ref: "#/components/requestBodies/ProductsRequest"
+      responses:
+        '200':
+          $ref: "#/components/responses/ProductsResponse"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '408':
+          $ref: '#/components/responses/RequestTimeout'
+        '412':
+          $ref: '#/components/responses/PreconditionFailed'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+components:
+  parameters:
+    Authorization:
+      name: Authorization
+      in: header
+      description: Token de autorizacion
+      required: true
+      examples:
+        Token-uuid:
+          summary: token uuid
+          value: Bearer 9c7d1983-4261-4627-87a0-32ea644a5855
+        Token-jwt:
+          summary: token jwt
+          value: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJQUzUxMiJ9.ew0KICAgICJpc3MiOiAiQ0FfR0FURVdBWSIsDQogICAgImV4cCI6IDQwNzQ2MTkxNjIsDQogICAgImludGVyY2VwdFVybE1hcCI6IFsNCiAgICAgICAgew0KICAgICAgICAgICAgInBhdHRlcm4iOiAiLyoqLyoqIg0KICAgICAgICB9DQogICAgXQ0KfQ.MWQY1q8GmXvfIVLow1h8MLNCPZK3qQr27FcZe8a6eqDkQcCOKr-hD5-s_n_N3y29uDnL5xZ8qe4G8UfLuqXLDEu-0EJdPy1EeUbyKJL-brhl3REhPfdbsVMM710U52oLBbg3etwVcKdQRf6Y2NrWSyiqW0zpWwlJOTAumNB5_Jq5YAAGqf4ym05973OYD44gm7WcXOLiLyMEFZNH7xTmsKHvLYb_FOKW_Kb1tJxPcf02Ur2SpWGVl9wZt2ZM510FWCNXE1qyzAkh2tY4bi6x4tEe41nBurP38pmQBrgNsQnlTj1TkKrjDozYpEolfqnSbc_DxDD-6cxqM18JxmklSA
+      schema:
+        type: string
+        example: Bearer 9c7d1983-4261-4627-87a0-32ea644a5855
+    Request-ID:
+      name: Request-ID
+      in: header
+      description: 'Este campo es un valor estandar ya existente y sera usado como identificador.'
+      required: true
+      schema:
+        type: string
+        maxLength: 36
+        pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[34][0-9a-fA-F]{3}-[89ab][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$'
+        example: '550e8400-e29b-41d4-a716-446655440000'
+    app-code:
+      name: app-code
+      in: header
+      description: 'Codigo de la aplicacion  que invoca el servicio. Se debe usar    el
+        codigo de 2 caracteres que tienen asignada las aplicaciones, puede
+        ser    el canal.'
+      required: true
+      schema:
+        type: string
+        maxLength: 4
+        minLength: 2
+        example: MK
+    caller-name:
+      name: caller-name
+      in: header
+      description: 'Nombre de la API que realiza la invocacion al servicio.'
+      required: true
+      schema:
+        type: string
+        maxLength: 100
+        minLength: 5
+        example: patlalnxd01
+    orig-device-id:
+      name: orig-device-id
+      in: header
+      description: 'Codigo identificador del dispositivo.'
+      required: true
+      examples:
+        android:
+          summary: Android
+          value: 9c7d1983-4261-4627-87a0-32ea644a5855
+        iOS:
+          summary: iOS
+          value: E529CDA9-AB84-4C63-B2CC-64EEB7736C1E
+      schema:
+        pattern: '[0-9a-fA-F]{8}(\-[0-9a-fA-F]{4}){3}\-[0-9a-fA-F]{12}|[0-9a-fA-F]{16}'
+        type: string
+        example: eeee0f91-b777-4ae8-9f53-3e9ca1052ee6
+    session-UID:
+      name: session-UID
+      in: header
+      description: 'Llave de Sesion: Identificador unico que permitira vincular todos
+        los eventos relacionados a una sesion del usuario.'
+      required: true
+      schema:
+        type: string
+        nullable: false
+        pattern: '[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}'
+        example: eeee0f91-b777-4ae8-9f53-3e9ca1052ee6
+  requestBodies:
+    ProductsRequest:
+      description: Request para Productos.
+      required: true
+      content:
+        application/json;charset=UTF-8:
+          schema:
+            $ref: "#/components/schemas/ProductsRequest"
+  responses:
+    ProductsResponse:
+      description: se obtuvo los productos disponibles con éxito.
+      content:
+        application/stream+json:
+          schema:
+            $ref: '#/components/schemas/ProductsResponse'
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ProductsResponse'
+    BadRequest:
+      description: Los datos proporcionados en la solicitud no son válidos.
+      content:
+        application/json;charset=UTF-8:
+          schema:
+            $ref: '#/components/schemas/ApiException'
+    CompanyAccountBadRequest:
+      description: Los datos proporcionados en la solicitud no son válidos.
+      content:
+        application/json;charset=UTF-8:
+          schema:
+            $ref: '#/components/schemas/ApiException'
+    TopValidateBadRequest:
+      description: Los datos proporcionados en la solicitud no son válidos.
+      content:
+        application/json;charset=UTF-8:
+          schema:
+            $ref: '#/components/schemas/ApiException'
+    ExchangeBadRequest:
+      description: Los datos proporcionados en la solicitud no son válidos.
+      content:
+        application/json;charset=UTF-8:
+          schema:
+            $ref: '#/components/schemas/ApiException'
+    PermissionBadRequest:
+      description: Los datos proporcionados en la solicitud no son válidos.
+      content:
+        application/json;charset=UTF-8:
+          schema:
+            $ref: '#/components/schemas/ApiException'
+    AccountBadRequest:
+      description: Los datos proporcionados en la solicitud no son válidos.
+      content:
+        application/json;charset=UTF-8:
+          schema:
+            $ref: '#/components/schemas/ApiException'
+    RegisterBadRequest:
+      description: Los datos proporcionados en la solicitud no son válidos.
+      content:
+        application/json;charset=UTF-8:
+          schema:
+            $ref: '#/components/schemas/ApiException'
+    Unauthorized:
+      description: No tiene autorización para acceder al recurso.
+      content:
+        application/json;charset=UTF-8:
+          schema:
+            $ref: '#/components/schemas/ApiException'
+          example:
+            code: TL0002
+            description: Unauthorized
+            errorType: THECNICAL
+            exceptionDetail:
+              - code: MB0008
+                component: bussiness_mbob_transfer
+                description: The origin server did not find a current representation for the target resource or is not willing to disclose that one exists.
+    RequestTimeout:
+      description: No se pudo obtener respuesta del servidor.
+      content:
+        application/json;charset=UTF-8:
+          schema:
+            $ref: '#/components/schemas/ApiException'
+          example:
+            code: TL0003
+            description: Request Timeout
+            errorType: THECNICAL
+            exceptionDetail:
+              - code: MB0008
+                component: bussiness_mbob_transfer
+                description: The server did not receive a complete request message within the time that it was prepared to wait.
+    PreconditionFailed:
+      description: El dispositivo que realiza la operación no está registrado.
+      content:
+        application/json;charset=UTF-8:
+          schema:
+            $ref: '#/components/schemas/ApiException'
+          example:
+            code: TL0004
+            description: Internal Server Error
+            errorType: THECNICAL
+            exceptionDetail:
+              - code: MB0008
+                component: bussiness_mbob_transfer
+                description: The server encountered an unexpected condition that prevented it from fulfilling the request.
+    InternalServerError:
+      description: Error interno no controlado.
+      content:
+        application/json;charset=UTF-8:
+          schema:
+            $ref: '#/components/schemas/ApiException'
+          example:
+            code: TL0005
+            description: Internal Server Error
+            errorType: THECNICAL
+            exceptionDetail:
+              - code: MB0008
+                component: bussiness_mbob_transfer
+                description: The server encountered an unexpected condition that prevented it from fulfilling the request.
+    NotFound:
+      description: Recurso no encontrado.
+      content:
+        application/json;charset=UTF-8:
+          schema:
+            $ref: '#/components/schemas/ApiException'
+          example:
+            code: TL0006
+            description: NotFound
+            errorType: THECNICAL
+            exceptionDetail:
+              - code: MB0008
+                component: bussiness_mbob_transfer
+                description: The server is currently unable to handle the request due to a temporary overload or scheduled maintenance, which will likely be alleviated after some delay.
+    ServiceUnavailable:
+      description: Service unavailable.
+      content:
+        application/json;charset=UTF-8:
+          schema:
+            $ref: '#/components/schemas/ApiException'
+          example:
+            code: TL0007
+            description: ServiceUnavailable
+            errorType: THECNICAL
+            exceptionDetail:
+              - code: MB0008
+                component: bussiness_mbob_transfer
+                description: The server is currently unable to handle the request due to a temporary overload or scheduled maintenance, which will likely be alleviated after some delay.
+    conflictBusinessValidation:
+      description: Validaciones relacionadas a restricciones y validaciones de negocio.
+      content:
+        application/json;charset=UTF-8:
+          schema:
+            $ref: '#/components/schemas/ApiException'
+  schemas:
+    ProductsResponse:
+      type: object
+      required:
+        - productResp
+      properties:
+        productResp:
+          type: array
+          items:
+            $ref: '#/components/schemas/TitularResponse'
+    ProductsRequest:
+      type: object
+      required:
+        - productoData
+      properties:
+        productoData:
+          $ref: '#/components/schemas/productoData'
+    productoData:
+      type: object
+      required:
+        - productId
+        - name
+        - tipo
+        - subtipo
+        - titulares
+      properties:
+        productId:
+          type: string
+          description: Id de producto
+          example: 1234567
+        name:
+          type: string
+          description: Nombre de Producto
+          example: 1234567
+        tipo:
+          type: string
+          description: Nombre de Producto
+          example: 1234567
+        subtipo:
+          type: string
+          description: Nombre de Producto
+          example: 1234567
+        titulares:
+          type: array
+          items:
+            $ref: '#/components/schemas/Titular'
+    Titular:
+      type: object
+      required:
+        - idcliente
+        - nombre
+        - tipodoc
+        - numdoc
+      properties:
+        idcliente:
+          type: string
+          description: Id de la empresa de destino
+          example: 1234567
+        nombre:
+          type: string
+          description: Id de la cuenta de destino
+          example: 1234567
+        tipodoc:
+          type: string
+          description: Id de la empresa de destino
+          example: 1234567
+        numdoc:
+          type: string
+          description: Id de la cuenta de destino
+          example: 1234567
+    TitularResponse:
+      type: object
+      required:
+        - idcliente
+        - nombre
+        - tipodoc
+        - numdoc
+        - products
+      properties:
+        idcliente:
+          type: string
+          description: Id de la empresa de destino
+          example: 1234567
+        nombre:
+          type: string
+          description: Id de la cuenta de destino
+          example: 1234567
+        tipodoc:
+          type: string
+          description: Id de la empresa de destino
+          example: 1234567
+        numdoc:
+          type: string
+          description: Id de la cuenta de destino
+          example: 1234567
+        products:
+          type: array
+          items:
+            $ref: '#/components/schemas/productoResponse'
+    productoResponse:
+      type: object
+      required:
+        - productId
+        - name
+        - tipo
+        - subtipo
+      properties:
+        productId:
+          type: string
+          description: Id de producto
+          example: 1234567
+        name:
+          type: string
+          description: Nombre de Producto
+          example: 1234567
+        tipo:
+          type: string
+          description: Nombre de Producto
+          example: 1234567
+        subtipo:
+          type: string
+          description: Nombre de Producto
+          example: 1234567
+    ApiException:
+      type: object
+      title: ApiException
+      description: Datos del error de sistema.
+      properties:
+        code:
+          type: string
+          example: TL0001
+          description: Codigo de error de Sistema
+        description:
+          type: string
+          example: Error al llamar al servicio
+          description: Descripcion del error de Sistema
+        errorType:
+          type: string
+          example: TECHNICAL
+          description: Tipo de Error de Sistema
+        exceptionDetails:
+          type: array
+          description: Lista de detalles del error
+          items:
+            $ref: "#/components/schemas/ApiExceptionDetail"
+        properties:
+          type: object
+          description: Lista de propiedades especiales.
+    ApiExceptionDetail:
+      type: object
+      properties:
+        code:
+          type: string
+          example: MB0008
+          description: Codigo de error del Detalle/Proveedor
+        component:
+          type: string
+          example: MB.CardInqV2
+          description: Nombre del componente de falla
+        description:
+          type: string
+          example: Codigo invalido para el canal
+          description: Descripcion del Detalle
+      title: ApiExceptionDetail
+      description: Datos del error tecnico.
